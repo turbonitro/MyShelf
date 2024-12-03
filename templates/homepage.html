@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Homepage - MyShelf</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Exa&family=Inter&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="/homepage" id="myshelf-link" style="text-decoration: none; color: inherit;">MyShelf</a>
+        </h1>
+        <div class="search-container">
+            <form action="/search_everything" method="get">
+                <input type="text" name="query" placeholder="Search for books, movies, music...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+        <button class="logout" onclick="window.location.href='/logout'">Logout</button>
+    </header>
+
+    <div class="welcome">
+        <h2>HI {{ username }}!</h2>
+        <br>
+        <h4>Welcome to the platform where you can post titles you have recently experienced, rate them and comment on them, so that you have everything in one place and can return to it at any time. It is simply your shelf for the books you have read, the music albums you have listened to and the movies you have watched.</h4>
+        <br><br>
+        <h4>Just place a new item on YourShelf:</h4>
+    </div>
+<br>
+    <div class="container">
+        <div class="item-block">
+            <h2 style="cursor: pointer;" onclick="window.location.href='/books';">Books</h2>
+            <h4>Place a new book on your shelf:</h4>
+            <br>
+            <form action="/homepage" method="post" class="add-item-form">
+                <label for="book_id" style="font-size: 16px; font-family: 'Inter', sans-serif;">Search for the book:</label>
+                <input type="text" id="book-search" name="book_title" required style="font-family: 'Inter', sans-serif;">
+                <button type="button" class="search-button" data-search-type="book"><i class="fas fa-search"></i></button>
+                <input type="hidden" id="book-id-input" name="book_id">
+                <div class="search-results" id="search-results-books"></div>
+                <button type="submit">Add</button>
+            </form>
+            <br>
+            <div class="book-list">
+                {% for item in user_books %}
+                <div class="item">
+                    <button class="delete-button" data-item-id="{{ item['id'] }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <div class="item-title">{{ item['title'] }}</div>
+                    <div class="item-subtitle">by {{ item['author'] }}</div>
+                    <div class="item-date-added">Added on {{ item['date_added'].strftime('%Y-%m-%d %H:%M')[:16] }}</div>
+                    <div class="item-rating">
+                        <div class="rating">
+                            <input type="radio" name="rating_{{ item['id'] }}" value="5" id="5_{{ item['id'] }}" {% if item['rating'] == 5 %}checked{% endif %}><label for="5_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="5">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="4" id="4_{{ item['id'] }}" {% if item['rating'] == 4 %}checked{% endif %}><label for="4_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="4">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="3" id="3_{{ item['id'] }}" {% if item['rating'] == 3 %}checked{% endif %}><label for="3_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="3">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="2" id="2_{{ item['id'] }}" {% if item['rating'] == 2 %}checked{% endif %}><label for="2_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="2">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="1" id="1_{{ item['id'] }}" {% if item['rating'] == 1 %}checked{% endif %}><label for="1_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="1">☆</label>
+                        </div>
+                        <div class="comment-section">
+                            <textarea name="comment" placeholder="Add your comment" data-item-id="{{ item['id'] }}">{{ item['comment'] }}</textarea>
+                            <button type="button" class="update-comment-button" data-item-id="{{ item['id'] }}">Update</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="/books" class="view-all-link">View all your books</a>
+            <br>
+        </div>
+        <div class="item-block">
+            <h2 style="cursor: pointer;" onclick="window.location.href='/movies';">Movies</h2>
+            <h4>Place a new movie on your shelf:</h4>
+            <br>
+            <form action="/homepage" method="post" class="add-item-form">
+                <label for="movie_id" style="font-size: 16px; font-family: 'Inter', sans-serif;">Search for the movie:</label>
+                <input type="text" id="movie-search" name="movie_title" required style="font-family: 'Inter', sans-serif;">
+                <button type="button" class="search-button" data-search-type="movie"><i class="fas fa-search"></i></button>
+                <input type="hidden" id="movie-id-input" name="movie_id">
+                <div class="search-results" id="search-results-movies"></div>
+                <button type="submit">Add</button>
+            </form>
+            <br>
+            <div class="movie-list">
+                {% for item in user_movies %}
+                <div class="item">
+                    <button class="delete-button" data-item-id="{{ item['id'] }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <div class="item-title">{{ item['title'] }} {{ item['release_year'] }}</div>
+                    <div class="item-subtitle">Director: {{ item['director'] }}</div>
+                    <div class="item-date-added">Added on {{ item['date_added'].strftime('%Y-%m-%d %H:%M')[:16] }}</div>          
+                    <div class="item-rating">
+                        <div class="rating">
+                            <input type="radio" name="rating_{{ item['id'] }}" value="5" id="5_{{ item['id'] }}" {% if item['rating'] == 5 %}checked{% endif %}><label for="5_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="5">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="4" id="4_{{ item['id'] }}" {% if item['rating'] == 4 %}checked{% endif %}><label for="4_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="4">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="3" id="3_{{ item['id'] }}" {% if item['rating'] == 3 %}checked{% endif %}><label for="3_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="3">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="2" id="2_{{ item['id'] }}" {% if item['rating'] == 2 %}checked{% endif %}><label for="2_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="2">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="1" id="1_{{ item['id'] }}" {% if item['rating'] == 1 %}checked{% endif %}><label for="1_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="1">☆</label>
+                        </div>
+                        <div class="comment-section">
+                            <textarea name="comment" placeholder="Add your comment" data-item-id="{{ item['id'] }}">{{ item['comment'] }}</textarea>
+                            <button type="button" class="update-comment-button" data-item-id="{{ item['id'] }}">Update</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="/movies" class="view-all-link">View all your movies</a>
+            <br>
+        </div>
+        <div class="item-block">
+            <h2 style="cursor: pointer;" onclick="window.location.href='/music';">Music</h2>
+            <h4>Place a new album on your shelf:</h4>
+            <br>
+            <form action="/homepage" method="post" class="add-item-form">
+                <label for="music_id" style="font-size: 16px; font-family: 'Inter', sans-serif;">Search for the music:</label>
+                <input type="text" id="music-search" name="music_title" required style="font-family: 'Inter', sans-serif;">
+                <button type="button" class="search-button" data-search-type="music"><i class="fas fa-search"></i></button>
+                <input type="hidden" id="music-id-input" name="music_id">
+                <div class="search-results" id="search-results-music"></div>
+                <button type="submit">Add</button>
+            </form>
+            <br>
+            <div class="music-list">
+                {% for item in user_music %}
+                <div class="item">
+                    <button class="delete-button" data-item-id="{{ item['id'] }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <div class="item-title">{{ item['title'] }}</div>
+                    <div class="item-subtitle">by {{ item['artist_name'] }}</div>
+                    <div class="item-date-added">Added on {{ item['date_added'].strftime('%Y-%m-%d %H:%M')[:16] }}</div>
+                    <div class="item-rating">
+                        <div class="rating">
+                            <input type="radio" name="rating_{{ item['id'] }}" value="5" id="5_{{ item['id'] }}" {% if item['rating'] == 5 %}checked{% endif %}><label for="5_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="5">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="4" id="4_{{ item['id'] }}" {% if item['rating'] == 4 %}checked{% endif %}><label for="4_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="4">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="3" id="3_{{ item['id'] }}" {% if item['rating'] == 3 %}checked{% endif %}><label for="3_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="3">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="2" id="2_{{ item['id'] }}" {% if item['rating'] == 2 %}checked{% endif %}><label for="2_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="2">☆</label>
+                            <input type="radio" name="rating_{{ item['id'] }}" value="1" id="1_{{ item['id'] }}" {% if item['rating'] == 1 %}checked{% endif %}><label for="1_{{ item['id'] }}" data-item-id="{{ item['id'] }}" data-rating="1">☆</label>
+                        </div>
+                        <div class="comment-section">
+                            <textarea name="comment" placeholder="Add your comment" data-item-id="{{ item['id'] }}">{{ item['comment'] }}</textarea>
+                            <button type="button" class="update-comment-button" data-item-id="{{ item['id'] }}">Update</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="/music" class="view-all-link">View all your music</a>
+            <br>
+        </div>
+    </div>
+    <br>
+    <br>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Your Books - MyShelf</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Exa&family=Inter&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='homepage_styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+   
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .columns {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 10px;
+            flex-wrap: wrap; /* Allows wrapping of blocks on smaller screens */
+        }
+
+        .item-block {
+            box-shadow: 0 0 10px rgba(159, 159, 159, 0.1);
+            min-width: 350px;
+            flex: 1; /* Allows flex items to grow equally */
+            margin-bottom: 5px; /* Adds space between blocks on smaller screens */
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        h3 {
+            width: 100%;
+            font-family: 'Rubik Mono One', sans-serif;
+            font-size: 25px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .user-books-search-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0; /* Adds space above and below the search field */
+        }
+
+        #userBooksSearch {
+            width: 50%; 
+            max-width: 400px; 
+            padding: 6px; 
+            font-size: 14px; 
+            font-family: 'Inter', sans-serif; 
+            border-radius: 5px; 
+            border: 1px solid #ccc; 
+            text-align: left; 
+        }
+
+        #userBooksSearch::placeholder {
+            text-align: left;
+            font-family: 'Inter', sans-serif; 
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .columns {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .item-block {
+                width: 97%; 
+                min-width: unset; 
+            }
+
+            .item-block:nth-child(3) {
+            width: 97%; 
+            }
+
+            header {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            header h1 {
+                margin-bottom: 10px;
+            }
+
+            .search-container {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            .logout {
+                margin-top: 10px;
+            }
+
+            h3 {
+                text-align: center;
+                margin-top: 0px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>
+            <a href="/homepage" id="myshelf-link" style="text-decoration: none; color: inherit;">MyShelf</a>
+        </h1>
+        <div class="search-container">
+            <form action="/search_everything" method="get">
+                <input type="text" name="query" value="{{ query }}" placeholder="Search for books, movies, music...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+        <button class="logout" onclick="window.location.href='/logout'">Logout</button>
+    </header>
+
+    <h3>Your Books</h3>
+
+    <!-- New search field for books -->
+    <div class="user-books-search-container">
+        <input type="text" id="userBooksSearch" placeholder="Search for a title among your books...">
+    </div>
+
+    <div class="container">
+        <div class="columns">
+            <div class="item-block">
+                <div class="book-list">
+                    {% for item in user_books[0::3] %}
+                    <div class="item">
+                        <button class="delete-button" data-item-id="{{ item[0] }}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <div class="item-title">{{ item[3] }}</div>
+                        <div class="item-subtitle">by {{ item[8] }}</div>
+                        <div class="item-date-added">Added on {{ item[7].strftime('%Y-%m-%d %H:%M')[:16] }}</div>
+                        <div class="item-rating">
+                            <div class="rating">
+                                <input type="radio" name="rating_{{ item[0] }}" value="5" id="5_{{ item[0] }}" {% if item[5] == 5 %}checked{% endif %}><label for="5_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="5">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="4" id="4_{{ item[0] }}" {% if item[5] == 4 %}checked{% endif %}><label for="4_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="4">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="3" id="3_{{ item[0] }}" {% if item[5] == 3 %}checked{% endif %}><label for="3_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="3">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="2" id="2_{{ item[0] }}" {% if item[5] == 2 %}checked{% endif %}><label for="2_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="2">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="1" id="1_{{ item[0] }}" {% if item[5] == 1 %}checked{% endif %}><label for="1_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="1">☆</label>
+                            </div>
+                            <div class="comment-section">
+                                <textarea name="comment" placeholder="Add your comment" data-item-id="{{ item[0] }}">{{ item[6] }}</textarea>
+                                <button type="button" class="update-comment-button" data-item-id="{{ item[0] }}">Update</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="item-block">
+                <div class="book-list">
+                    {% for item in user_books[1::3] %}
+                    <div class="item">
+                        <button class="delete-button" data-item-id="{{ item[0] }}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <div class="item-title">{{ item[3] }}</div>
+                        <div class="item-subtitle">by {{ item[8] }}</div>
+                        <div class="item-date-added">Added on {{ item[7].strftime('%Y-%m-%d %H:%M')[:16] }}</div>
+                        <div class="item-rating">
+                            <div class="rating">
+                                <input type="radio" name="rating_{{ item[0] }}" value="5" id="5_{{ item[0] }}" {% if item[5] == 5 %}checked{% endif %}><label for="5_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="5">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="4" id="4_{{ item[0] }}" {% if item[5] == 4 %}checked{% endif %}><label for="4_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="4">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="3" id="3_{{ item[0] }}" {% if item[5] == 3 %}checked{% endif %}><label for="3_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="3">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="2" id="2_{{ item[0] }}" {% if item[5] == 2 %}checked{% endif %}><label for="2_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="2">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="1" id="1_{{ item[0] }}" {% if item[5] == 1 %}checked{% endif %}><label for="1_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="1">☆</label>
+                            </div>
+                            <div class="comment-section">
+                                <textarea name="comment" placeholder="Add your comment" data-item-id="{{ item[0] }}">{{ item[6] }}</textarea>
+                                <button type="button" class="update-comment-button" data-item-id="{{ item[0] }}">Update</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="item-block">
+                <div class="book-list">
+                    {% for item in user_books[2::3] %}
+                    <div class="item">
+                        <button class="delete-button" data-item-id="{{ item[0] }}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <div class="item-title">{{ item[3] }}</div>
+                        <div class="item-subtitle">by {{ item[8] }}</div>
+                        <div class="item-date-added">Added on {{ item[7].strftime('%Y-%m-%d %H:%M')[:16] }}</div>
+                        <div class="item-rating">
+                            <div class="rating">
+                                <input type="radio" name="rating_{{ item[0] }}" value="5" id="5_{{ item[0] }}" {% if item[5] == 5 %}checked{% endif %}><label for="5_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="5">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="4" id="4_{{ item[0] }}" {% if item[5] == 4 %}checked{% endif %}><label for="4_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="4">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="3" id="3_{{ item[0] }}" {% if item[5] == 3 %}checked{% endif %}><label for="3_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="3">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="2" id="2_{{ item[0] }}" {% if item[5] == 2 %}checked{% endif %}><label for="2_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="2">☆</label>
+                                <input type="radio" name="rating_{{ item[0] }}" value="1" id="1_{{ item[0] }}" {% if item[5] == 1 %}checked{% endif %}><label for="1_{{ item[0] }}" data-item-id="{{ item[0] }}" data-rating="1">☆</label>
+                            </div>
+                            <div class="comment-section">
+                                <textarea name="comment" placeholder="Add your comment" data-item-id="{{ item[0] }}">{{ item[6] }}</textarea>
+                                <button type="button" class="update-comment-button" data-item-id="{{ item[0] }}">Update</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="/books?page={{ page - 1 }}">&laquo; Previous</a>
+        {% endif %}
+        Page {{ page }} of {{ total_pages }}
+        {% if page < total_pages %}
+        <a href="/books?page={{ page + 1 }}">Next &raquo;</a>
+        {% endif %}
+    </div>
+    <br>
+    <br>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to handle rating update
+            function handleRatingUpdate() {
+                document.querySelectorAll('.rating label').forEach(function(star) {
+                    star.addEventListener('click', function() {
+                        var itemId = this.getAttribute('data-item-id');
+                        var rating = this.getAttribute('data-rating');
+    
+                        fetch('/update_rating', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                update_id: itemId,
+                                rating: rating
+                            })
+                        }).then(response => response.json()).then(data => {
+                            if (data.success) {
+                                showConfirmationMessage('Rating updated');
+                            }
+                        });
+                    });
+                });
+            }
+    
+            // Function to handle comment update
+            function handleCommentUpdate() {
+                document.querySelectorAll('.update-comment-button').forEach(function(button) {
+                    button.addEventListener('click', function() {
+                        var itemId = this.getAttribute('data-item-id');
+                        var comment = this.previousElementSibling.value;
+    
+                        fetch('/update_comment', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                update_id: itemId,
+                                comment: comment
+                            })
+                        }).then(response => response.json()).then(data => {
+                            if (data.success) {
+                                showConfirmationMessage('Comment added');
+                            }
+                        });
+                    });
+                });
+            }
+
+                // Function to show confirmation message
+            function showConfirmationMessage(message) {
+                const confirmationDiv = document.createElement('div');
+                confirmationDiv.textContent = message;
+                confirmationDiv.style.position = 'fixed';
+                confirmationDiv.style.top = '20px';
+                confirmationDiv.style.left = '50%';
+                confirmationDiv.style.transform = 'translateX(-50%)';
+                confirmationDiv.style.backgroundColor = '#fffdb5';
+                confirmationDiv.style.color = 'black';
+                confirmationDiv.style.padding = '10px 20px';
+                confirmationDiv.style.borderRadius = '10px';
+                confirmationDiv.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.1)';
+                confirmationDiv.style.zIndex = '1000';
+                confirmationDiv.style.opacity = '0';
+                confirmationDiv.style.transition = 'opacity 0.8s';
+                document.body.appendChild(confirmationDiv);
+
+                setTimeout(() => {
+                    confirmationDiv.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    confirmationDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        confirmationDiv.remove();
+                    }, 400);
+                }, 2000);
+            }
+
+
+            // Function to handle item deletion
+            function handleItemDeletion() {
+                document.querySelectorAll('.delete-button').forEach(function(button) {
+                    button.addEventListener('click', function() {
+                        var itemId = this.getAttribute('data-item-id');
+    
+                        fetch('/delete_item', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                item_id: itemId
+                            })
+                        }).then(response => response.json()).then(data => {
+                            if (data.success) {
+                                location.reload();
+                            }
+                        });
+                    });
+                });
+            }
+    
+            // Initialize handlers
+            handleRatingUpdate();
+            handleCommentUpdate();
+            handleItemDeletion();
+    
+            // Live search functionality
+            document.getElementById('userBooksSearch').addEventListener('input', function() {
+                let query = this.value;
+    
+                if (query.length > 2) {
+                    fetch(`/search_user_books?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let bookList = document.querySelector('.columns');
+                        bookList.innerHTML = '';
+    
+                        data.forEach(book => {
+                            let itemBlock = document.createElement('div');
+                            itemBlock.className = 'item-block';
+    
+                            let itemContent = `
+                                <div class="item">
+                                    <button class="delete-button" data-item-id="${book.id}">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <div class="item-title">${book.title}</div>
+                                    <div class="item-subtitle">by ${book.author}</div>
+                                    <div class="item-date-added">Added on ${book.date_added}</div>
+                                    <div class="item-rating">
+                                        <div class="rating">`;
+    
+                            for (let i = 5; i >= 1; i--) {
+                                itemContent += `
+                                    <input type="radio" name="rating_${book.id}" value="${i}" id="${i}_${book.id}" ${book.rating == i ? 'checked' : ''}>
+                                    <label for="${i}_${book.id}" data-item-id="${book.id}" data-rating="${i}">☆</label>`;
+                            }
+    
+                            itemContent += `
+                                        </div>
+                                        <div class="comment-section">
+                                            <textarea name="comment" placeholder="Add your comment" data-item-id="${book.id}">${book.comment || ''}</textarea>
+                                            <button type="button" class="update-comment-button" data-item-id="${book.id}">Update</button>
+                                        </div>
+                                    </div>
+                                </div>`;
+    
+                            itemBlock.innerHTML = itemContent;
+                            bookList.appendChild(itemBlock);
+                        });
+    
+                        // Reinitialize event handlers after updating the DOM
+                        handleRatingUpdate();
+                        handleCommentUpdate();
+                        handleItemDeletion();
+                    });
+                } else if (query.length === 0) {
+                    // If the query is empty, reload the original content
+                    fetch('/books')
+                    .then(response => response.text())
+                    .then(html => {
+                        let doc = new DOMParser().parseFromString(html, 'text/html');
+                        let originalContent = doc.querySelector('.columns').innerHTML;
+                        document.querySelector('.columns').innerHTML = originalContent;
+    
+                        // Reinitialize event handlers after restoring original content
+                        handleRatingUpdate();
+                        handleCommentUpdate();
+                        handleItemDeletion();
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
